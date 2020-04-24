@@ -1,0 +1,27 @@
+### BEGIN INIT INFO
+# Provides: ARCHERSnapinReplicator
+# Required-Start: $local_fs $remote_fs $network $syslog $network $inetd
+# Required-Stop: $local_fs $remote_fs $network $syslog $network $inetd
+# Default-Start: 2 3 4 5
+# Default-Stop: 0 1 6
+# X-Interactive: true
+# Short-Description: Start/Stop ARCHERSnapinReplicator
+# Long-Description: Created by David Fear 
+# Used to stop and start the ARCHERSnapinReplicator Service.
+# ARCHERSnapinReplicator enacts upon the ARCHER System to replicate
+# Snapins to nodes.  It only replicates if it is the master node.
+### END INIT INFO
+
+[Unit]
+Description=ARCHERSnapinReplicator
+After=syslog.target network.target network-online.target mysql.service
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=1
+ExecStart=/usr/bin/php env /opt/archer/service/ARCHERSnapinReplicator/ARCHERSnapinReplicator
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,63 @@
+#!/usr/bin/php -q
+<?php
+/**
+ * ARCHERSnapinHash service to get the hash of snapins in ARCHER
+ *
+ * PHP version 5
+ *
+ * @category ARCHERSnapinHash
+ * @package  ARCHERProject
+ * @author   uMax Group <healer@umax.uz>
+ * @license  http://archer.umax.uz/licenses/
+ * @link     https://archer.umax.uz
+ */
+/**
+ * ARCHERSnapinHash service to get the hash of snapins in ARCHER
+ *
+ * @category ARCHERSnapinHash
+ * @package  ARCHERProject
+ * @author   uMax Group <healer@umax.uz>
+ * @license  http://archer.umax.uz/licenses/
+ * @link     https://archer.umax.uz
+ */
+@error_reporting(0);
+require dirname(realpath(__FILE__)).'/../etc/config.php';
+require dirname(realpath(__FILE__)).'/../lib/service_lib.php';
+$service_name = 'ARCHERSnapinHash';
+service_persist($service_name);
+$ServiceClass = $ARCHERCore::getClass('SnapinHash');
+$ServiceClass->getBanner();
+$ServiceClass->waitInterfaceReady();
+$ServiceClass->waitDbReady();
+$ServiceClass->serviceStart();
+while (true) {
+    if (!$ServiceClass::$zzz) {
+        $ServiceClass::$zzz = 600;
+    }
+    if (!isset($nextrun)) {
+        $ServiceClass->serviceRun();
+        $nextrun = ARCHERCore::niceDate()
+            ->modify(
+                sprintf(
+                    '+%s second%s',
+                    $ServiceClass::$zzz,
+                    $ServiceClass::$zzz != 1 ? '' : 's'
+                )
+            );
+    }
+    if (ARCHERCore::niceDate() < $nextrun) {
+        usleep(100000);
+        continue;
+    }
+    $nextrun = ARCHERCore::niceDate()
+        ->modify(
+            sprintf(
+                '+%s second%s',
+                $ServiceClass::$zzz,
+                $ServiceClass::$zzz != 1 ? '' : 's'
+            )
+        );
+    $ServiceClass->serviceRun();
+}
+$ServiceClass::outall(sprintf(" * Service has ended."));
+exit(0);

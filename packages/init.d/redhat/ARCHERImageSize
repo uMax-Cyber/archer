@@ -1,0 +1,66 @@
+#!/bin/sh
+#   chkconfig: 2345 97 10
+#   description: Startup/shutdown script for the ARCHER Image Size \
+#                Management service.
+
+# Source function library.
+. /etc/init.d/functions
+
+DAEMONSTART="/opt/archer/service/ARCHERImageSize/ARCHERImageSize &"
+DAEMONKILL=ARCHERImageSize
+
+prog=ARCHERImageSize
+
+start () {
+	echo -n $"Starting $prog: "
+
+	# start daemon
+	daemon $DAEMONSTART
+        RETVAL=$?
+	echo
+	[ $RETVAL = 0 ] && touch /var/lock/subsys/archerisman
+	return $RETVAL
+}
+
+stop () {
+	# stop daemon
+	echo -n $"Stopping $prog: "
+	killproc $DAEMONKILL
+	RETVAL=$?
+	echo
+	[ $RETVAL = 0 ] && rm -f /var/lock/subsys/archerisman
+}
+
+restart() {
+	echo -n $"Restarting $prog: "
+	killproc $DAEMONKILL
+	RETVAL=$?
+	[ $RETVAL = 0 ] && rm -f /var/lock/subsys/archerisman
+	daemon $DAEMONSTART
+	RETVAL=$?
+	echo
+	[ $RETVAL = 0 ] && touch /var/lock/subsys/archerisman
+	return $RETVAL
+}
+
+case $1 in
+	start)
+		start
+	;;
+	stop)
+		stop
+	;;
+	restart)
+		restart
+	;;
+	status)
+		status $DAEMONKILL
+		RETVAL=$?
+	;;
+	*)
+
+	echo $"Usage: $prog {start|stop|restart|status}"
+	exit 3
+esac
+
+exit $RETVAL
